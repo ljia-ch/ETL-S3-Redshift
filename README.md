@@ -13,7 +13,7 @@ There are two types of data related to this project: Song Dataset and Log Datase
 
         song_data/A/B/C/TRABCEI128F424C983.json
         song_data/A/A/B/TRAABJL12903CDCF1A.json
-<br>
+
     Inside each JSON file, data has following structure: 
         
         {
