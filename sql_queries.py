@@ -31,9 +31,9 @@ staging_events_table_create= ("""
             auth                VARCHAR,
             firstName           VARCHAR,
             gender              CHAR,
-            itemInSession       INT,
+            itemInSession       VARCHAR,
             lastName            VARCHAR,
-            length              FLOAT,
+            length              VARCHAR,
             level               VARCHAR,
             location            VARCHAR,
             method              VARCHAR,
@@ -44,7 +44,7 @@ staging_events_table_create= ("""
             status              INT,
             ts                  BIGINT,
             userAgent           VARCHAR,
-            userId              INT
+            userId              VARCHAR
         );
     
 """)
@@ -97,7 +97,7 @@ user_table_create = ("""
 
     CREATE TABLE IF NOT EXISTS users (
 
-        user_id      INT,
+        user_id      VARCHAR,
         first_name   VARCHAR,
         last_name    VARCHAR,
         gender       CHAR,
@@ -172,7 +172,8 @@ staging_songs_copy = ("""
      copy staging_songs
      from {}
      iam_role '{}'
-     region 'us-west-2';
+     region 'us-west-2'
+     json 'auto';
      
 """).format(SONG_DATA, ARN)
 
