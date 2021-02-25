@@ -9,7 +9,7 @@ This project is a ETL process built for a music streamming company moving their 
 There are two types of data related to this project: Song Dataset and Log Dataset
 
 * **Song** Dataset: <br>
-    a subset of real data from the [Million Song Dataset](http://millionsongdataset.com/). Each file is in JSON format and contains metadata about a song and the artist of that song. The files are partitioned by the first three letters of each song's track ID. For example, here are filepaths to two files in this dataset.
+    A subset of real data from the [Million Song Dataset](http://millionsongdataset.com/). Each file is in JSON format and contains metadata about a song and the artist of that song. The files are partitioned by the first three letters of each song's track ID. For example, here are filepaths to two files in this dataset.
 
         song_data/A/B/C/TRABCEI128F424C983.json
         song_data/A/A/B/TRAABJL12903CDCF1A.json
@@ -62,27 +62,39 @@ There are two types of data related to this project: Song Dataset and Log Datase
             "userId": "39"
         }
    <br>        
-    Tablar view: <br>
+    Tablar view with top lines: <br>
    
    <img src="./image/log-data_sample.png" width="1500">
-   
+
 ## Data Warehouse Table Design 
 
-We plan to create a database include staging tables without any keys and a star schema with relationships between fact and dimension tables 
+We plan to create a database include staging tables without any keys and a star schema with fact and dimension tables and relationships in between.
 
-* Redshift Cluster Database Entity Diagram
+* Redshift Cluster Database Entity Diagram: tables marked in different colors to differentiate staging tables from star schema tables.
 
  <img src="./image/ERD.png" width="1500">
- 
-* Distribution Key and Sort Key
 
-Here the distribution key was set on the songplay (Fact) table song_id column. The sort keys are set on each dimension table primary key. 
+* Table Creation:
+    * sql_queries.py: includes all staging, dimension and fact tables' creation and records insert queries
+    * Distribution and Sort Key in fact and dimensions. 
+        * The distribution key was set on the songplays (Fact) table (song_id column). 
+        * The sort keys are set on each dimension table primary key for easy join. 
+        * In songplays table, sort key are composited by the 4 foreign keys.
 
-* Analytics Query
+## ETL Process
+* Load data to taging tables: after table creation, we are ready to load data. Here we use COPY command load data from S3 file folder to staging tables.
+* Load data to star schema:
+    Use sql queries
+    * User and Time tables: records are inserted from staging_events table.
+    * Song and Artist tables: data are inserted from staging_songs table.
+    * Songplays table: records are inserted by joining staging_events and staging_songs table.
 
 
 
-## ETL pipeline
+
+
+
+
 
 
 
