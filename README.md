@@ -82,7 +82,11 @@ We plan to create a database include staging tables without any keys and a star 
         * In songplays table, sort key are composited by the 4 foreign keys.
 
 ## ETL Process
-* Load data to taging tables: after table creation, we are ready to load data. Here we use COPY command load data from S3 file folder to staging tables.
+* Load data to staging tables: after table creation, we are ready to load data. Here we use COPY command load data from S3 file folder to staging tables.
+    * when loading data to staging tables, I got a few errors. The command line window only give you clue about an error happened and use the query tool on Redshift to query the details in stl_load_error system table.
+        Load into table 'staging_events' failed.  Check 'stl_load_errors' system table for details.
+        1 "Invalid digit, Value 'S', Pos 0, Type: Integer". This error got fixed by change the data type to VARCHAR
+        1 "Delimiter not found". This error was fixed by adding a parameter "JSON 'auto'"
 * Load data to star schema:
     Use sql queries
     * User and Time tables: records are inserted from staging_events table.

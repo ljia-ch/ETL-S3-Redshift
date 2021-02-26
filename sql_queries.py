@@ -33,7 +33,7 @@ staging_events_table_create= ("""
             gender              CHAR,
             itemInSession       VARCHAR,
             lastName            VARCHAR,
-            length              VARCHAR,
+            length              FLOAT,
             level               VARCHAR,
             location            VARCHAR,
             method              VARCHAR,
@@ -78,7 +78,7 @@ songplay_table_create = ("""
     
         songplay_id INT         IDENTITY(0,1),
         start_time  TIME        NOT NULL REFERENCES time (start_time),
-        user_id     INT         NOT NULL REFERENCES users (user_id),
+        user_id     VARCHAR     NOT NULL REFERENCES users (user_id),
         level       VARCHAR,
         song_id     VARCHAR     NOT NULL REFERENCES songs (song_id) distkey,
         artist_id   VARCHAR     NOT NULL REFERENCES artists (artist_id),
@@ -181,7 +181,7 @@ staging_songs_copy = ("""
 
 songplay_table_insert = ("""
 
-    INSERT INTO songplay (
+    INSERT INTO songplays (
         start_time,
         user_id,
         level,
@@ -200,7 +200,7 @@ songplay_table_insert = ("""
 
 user_table_insert = ("""
 
-    INSERT INTO user (
+    INSERT INTO users (
         user_id,
         first_name,
         last_name,
@@ -208,12 +208,12 @@ user_table_insert = ("""
         level
     )
     SELECT userId, firstName, lastName, gender, level
-    FROM staging_songs
+    FROM staging_events
 """)
 
 song_table_insert = ("""
 
-    INSERT INTO song (
+    INSERT INTO songs (
         song_id,
         title,
         artist_id ,
@@ -221,11 +221,11 @@ song_table_insert = ("""
         duration  
     )
     SELECT song_id, title, artist_id, year, duration
-    FROM staging_events
+    FROM staging_songs
 """)
 
 artist_table_insert = ("""
-    INSERT INTO artist (
+    INSERT INTO artists (
         artist_id,
         name,
         location,
@@ -233,13 +233,13 @@ artist_table_insert = ("""
         longitude
     )
     SELECT artist_id, artist_name, artist_location, artist_latitude, artist_longitude
-    FROM staging_events
+    FROM staging_songs
 
 """)
 
 time_table_insert = ("""
     INSERT INTO time (
-        start time,
+        start_time,
         hour,
         day,
         week,
@@ -248,12 +248,12 @@ time_table_insert = ("""
         weekday
     )
     SELECT  start_time, 
-            EXTRACT(HOUR, start_time) AS hour, 
-            EXTRACT(DAY, start_time) AS day, 
-            EXTRACT(WEEK, start_time) AS week, 
-            EXTRACT(MONTH,start_time) AS month, 
-            EXTRACT(YEAR, start_time) AS year, 
-            EXTRACT(WEEKDAY, start_time)  AS weekday
+            EXTRACT(HOUR FROM start_time) AS hour, 
+            EXTRACT(DAY FROM start_time) AS day, 
+            EXTRACT(WEEK FROM start_time) AS week, 
+            EXTRACT(MONTH FROM start_time) AS month, 
+            EXTRACT(YEAR FROM start_time) AS year, 
+            EXTRACT(WEEKDAY FROM start_time)  AS weekday
     FROM
     (
     
@@ -267,6 +267,9 @@ time_table_insert = ("""
 # QUERY LISTS
 
 create_table_queries = [staging_events_table_create, staging_songs_table_create, time_table_create, user_table_create, artist_table_create, song_table_create, songplay_table_create]
+
 drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
+
 copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
+
+insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert, songplay_table_insert]
