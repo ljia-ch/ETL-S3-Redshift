@@ -4,12 +4,30 @@ from sql_queries import create_table_queries, drop_table_queries
 
 
 def drop_tables(cur, conn):
+    """
+    Drop all tables: staging and star schema tables
+    
+    Parameters: 
+        cur (class cursor): to run query on a database connection
+        conn (class connection): connection to PostgreSQL database instance
+        
+    Returns: nothing
+    """
     for query in drop_table_queries:
         cur.execute(query)
         conn.commit()
 
 
 def create_tables(cur, conn):
+    """
+    Create all tables: staging and star schema tables
+    
+    Parameters: 
+        cur (class cursor): to run query on a database connection
+        conn (class connection): connection to PostgreSQL database instance
+        
+    Returns: nothing
+    """
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
