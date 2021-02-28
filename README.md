@@ -95,9 +95,12 @@ We plan to create a database include staging tables without any keys and a star 
         1. "Delimiter not found". This error was fixed by adding a parameter "json 'auto'" at the end of Copy command.
 * Load data into star schema:
     Use sql queries
-    * Users and Time tables: records are inserted from staging_events table.
-    * Songs and Artists tables: data are inserted from staging_songs table.
-    * Songplays table: records are inserted by joining staging_events and staging_songs table.
+    * Users and Time tables: records are inserted from staging_events table. Only unique records get inserted. 
+    * Songs and Artists tables: data are inserted from staging_songs table. Only unique records inserted. 
+    * Songplays table: records are inserted by joining staging_events and staging_songs table. Need insert last to make sure all foreign key relationship in place.
+    
+* Drop tables
+    * If need load tables repeatedly, appropriate drop table statements need be considered. There is no duplication check included in this etl process. Here I handled the drop table statement follow the order: child tables drop before parent tables. 
 
 ## Set up and running 
 

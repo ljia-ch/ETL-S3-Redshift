@@ -179,6 +179,7 @@ staging_songs_copy = ("""
 
 # FINAL TABLES
 
+
 songplay_table_insert = ("""
 
     INSERT INTO songplays (
@@ -191,11 +192,11 @@ songplay_table_insert = ("""
         location,
         user_agent
     )
-    SELECT (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second') AS start_time, userId as user_id, level, song_id, artist_id, sessionId as session_id, location, userAgent as user_agent
+    SELECT DISTINCT (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second') AS start_time, userId as user_id, level, song_id, artist_id, sessionId as session_id, location, userAgent as user_agent
     FROM staging_events se
     JOIN staging_songs ss ON se.artist = ss.artist_name and se.length = ss.duration and se.song = ss.title
-    GROUP BY start_time, userId, level, song_id, artist_id, sessionId, location, userAgent
-
+    WHERE se.page = 'NextSong'
+    
 """)
 
 user_table_insert = ("""
@@ -207,10 +208,13 @@ user_table_insert = ("""
         gender,
         level
     )
-    SELECT userId, firstName, lastName, gender, level
+    SELECT DISTINCT userId, firstName, lastName, gender, level
     FROM staging_events
-    GROUP BY userId, firstName, lastName, gender, level
+    WHERE page = 'NextSong'
+    
 """)
+
+# Use GROUP BY instead of DISTINCT reason stated in line 182.
 
 song_table_insert = ("""
 
@@ -226,6 +230,7 @@ song_table_insert = ("""
     GROUP BY song_id, title, artist_id, year, duration 
 """)
 
+# Use GROUP BY instead of DISTINCT reason stated in line 182.
 artist_table_insert = ("""
     INSERT INTO artists (
         artist_id,
@@ -239,6 +244,7 @@ artist_table_insert = ("""
     GROUP BY artist_id, artist_name, artist_location, artist_latitude, artist_longitude
 
 """)
+
 
 time_table_insert = ("""
     INSERT INTO time (
@@ -273,7 +279,7 @@ time_table_insert = ("""
 create_table_queries = [staging_events_table_create, staging_songs_table_create, time_table_create, user_table_create, artist_table_create, song_table_create, songplay_table_create]
 
 # Drop table order: when table has foreign key drop child table first then parent table. That means the following order 
-drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop, songplay_table_drop]
+drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
 
 copy_table_queries = [staging_events_copy, staging_songs_copy]
 
