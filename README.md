@@ -2,11 +2,11 @@
 
 ## Summary
 
-This project is a ETL process built for a music streamming company moving their growing data to cloud. The company finished loading their data to AWS S3 storage folder. This project will handle extracting data from file folders (a serial of JSON files) to a AWS Redshift cluster. In this process, we first designed new data warehouse structure with fact and demension tables to store tranformed data. Data was loaded to staging tables in raw and then transformed before loaded into target tables.
+This project is an ETL process built for a music streamming company moving data to cloud with efficient structure for analytics purposes. The company finished loading their data to AWS S3 storage folders. The project will handle extracting data from file folders (a serial of JSON files) and load into an AWS Redshift cluster. In this process, we first created staging tables to hold all the data copied from S3. Then we designed a new data warehouse structure with fact and demension tables to store original/tranformed data. 
 
 ## Data Source
 
-There are two types of data related to this project: Song Dataset and Log Dataset
+There are two types of data related to this project: 
 
 * **Song** Dataset: <br>
     A subset of real data from the [Million Song Dataset](http://millionsongdataset.com/). Each file is in JSON format and contains metadata about a song and the artist of that song. The files are partitioned by the first three letters of each song's track ID. For example, here are filepaths to two files in this dataset.
@@ -68,30 +68,44 @@ There are two types of data related to this project: Song Dataset and Log Datase
 
 ## Data Warehouse Table Design 
 
-We plan to create a database include staging tables without any keys and a star schema with fact and dimension tables and relationships in between.
+We plan to create a database include staging tables without any keys and a star schema with fact and dimension tables and relationships.
 
 * Redshift Cluster Database Entity Diagram: tables marked in different colors to differentiate staging tables from star schema tables.
 
  <img src="./image/ERD.png" width="1500">
 
 * Table Creation:
-    * sql_queries.py: includes all staging, dimension and fact tables' creation and records insert queries
-    * Distribution and Sort Key in fact and dimensions. 
-        * The distribution key was set on the songplays (Fact) table (song_id column). 
-        * The sort keys are set on each dimension table primary key for easy join. 
-        * In songplays table, sort key are composited by the 4 foreign keys.
+    * sql_queries.py: includes all table creation and loading script
+    * Distribution and Sort Keys are added in fact and dimension tables. 
+        * The distribution key is set in songplays (Fact) table (song_id column). 
+        * The sort keys are set as each dimension table's primary key for easy join. 
+        * In songplays table, sort key are composed of 4 foreign keys.
 
 ## ETL Process
-* Load data to staging tables: after table creation, we are ready to load data. Here we use COPY command load data from S3 file folder to staging tables.
-    * when loading data to staging tables, I got a few errors. The command line window only give you clue about an error happened and use the query tool on Redshift to query the details in stl_load_error system table.
+* Load data to staging tables: after table creation, we are ready to load data. Here we use COPY command loading data from S3 file folders to staging tables.
+    * when loading data to staging tables, I got a few errors using COPY command. In that case, the command line window only tells some error(s) happened and you will need use the query tool on Redshift webpage to query the error details in stl_load_error system table.
+    
+    Error message looks like:
+    
         Load into table 'staging_events' failed.  Check 'stl_load_errors' system table for details.
-        1 "Invalid digit, Value 'S', Pos 0, Type: Integer". This error got fixed by change the data type to VARCHAR
-        1 "Delimiter not found". This error was fixed by adding a parameter "JSON 'auto'"
-* Load data to star schema:
+        
+    The Two error I got: 
+    
+        1. "Invalid digit, Value 'S', Pos 0, Type: Integer". This error get fixed by change the related column data type to VARCHAR
+        1. "Delimiter not found". This error was fixed by adding a parameter "json 'auto'" at the end of Copy command.
+* Load data into star schema:
     Use sql queries
-    * User and Time tables: records are inserted from staging_events table.
-    * Song and Artist tables: data are inserted from staging_songs table.
+    * Users and Time tables: records are inserted from staging_events table.
+    * Songs and Artists tables: data are inserted from staging_songs table.
     * Songplays table: records are inserted by joining staging_events and staging_songs table.
+
+## Set up and running 
+
+1. Create [IAM role](https://console.aws.amazon.com/iam/home#/roles) for using redshift service and attach policy to get S3 read only permission. 
+1. Create [Redshift cluster](https://console.aws.amazon.com/redshift/) with PostgreSQL database.
+1. Fill in real information in dwh.cfg file, here a template file is provided.
+1. Run create_table.py
+1. Run etl.py
 
 
 
